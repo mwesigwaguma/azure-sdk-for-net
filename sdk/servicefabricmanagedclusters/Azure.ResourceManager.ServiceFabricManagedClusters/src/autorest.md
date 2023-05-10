@@ -9,8 +9,8 @@ generate-model-factory: false
 csharp: true
 library-name: ServiceFabricManagedClusters
 namespace: Azure.ResourceManager.ServiceFabricManagedClusters
-require: https://github.com/Azure/azure-rest-api-specs/blob/53b1affe357b3bfbb53721d0a2002382a046d3b0/specification/servicefabricmanagedclusters/resource-manager/readme.md
-tag: package-2022-01
+require: https://github.com/Azure/azure-rest-api-specs/blob/644e559292ea3314c1636285f138b8696536b006/specification/servicefabricmanagedclusters/resource-manager/readme.md
+tag: package-2023-02
 output-folder: $(this-folder)/Generated
 clear-output-folder: true
 skip-csproj: true
