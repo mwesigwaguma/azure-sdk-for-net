@@ -337,5 +337,10 @@ namespace Azure.ResourceManager.ServiceFabricManagedClusters
         {
             return GetAllAsync(cancellationToken: cancellationToken).GetAsyncEnumerator(cancellationToken);
         }
+
+        internal ServiceFabricManagedClusterResource CreateCluster()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -9,6 +9,10 @@ generate-model-factory: false
 csharp: true
 library-name: ServiceFabricManagedClusters
 namespace: Azure.ResourceManager.ServiceFabricManagedClusters
+input-file:
+  - https://github.com/a-santamaria/azure-rest-api-specs/blob/34e478a5aabaffbeea0a8fc001f42e64f5236261/specification/servicefabricmanagedclusters/resource-manager/Microsoft.ServiceFabric/preview/2023-02-01-preview/managedcluster.json
+  - https://github.com/a-santamaria/azure-rest-api-specs/blob/34e478a5aabaffbeea0a8fc001f42e64f5236261/specification/servicefabricmanagedclusters/resource-manager/Microsoft.ServiceFabric/preview/2023-02-01-preview/nodetype.json
+  - https://github.com/a-santamaria/azure-rest-api-specs/blob/34e478a5aabaffbeea0a8fc001f42e64f5236261/specification/servicefabricmanagedclusters/resource-manager/Microsoft.ServiceFabric/preview/2023-02-01-preview/managedapplication.json
 require: https://github.com/Azure/azure-rest-api-specs/blob/644e559292ea3314c1636285f138b8696536b006/specification/servicefabricmanagedclusters/resource-manager/readme.md
 tag: package-2023-02
 output-folder: $(this-folder)/Generated

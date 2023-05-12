@@ -1,18 +1,24 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System.Threading;
+using System.Threading.Tasks;
 using Azure.Core;
 using Azure.Core.TestFramework;
 using Azure.ResourceManager.Resources;
+using Azure.ResourceManager.ServiceFabricManagedClusters.Models;
 using Azure.ResourceManager.TestFramework;
 using NUnit.Framework;
-using System.Threading.Tasks;
 
 namespace Azure.ResourceManager.ServiceFabricManagedClusters.Tests
 {
     public class ServiceFabricManagedClustersManagementTestBase : ManagementRecordedTestBase<ServiceFabricManagedClustersManagementTestEnvironment>
     {
+        protected const string clusterName = "sfmc-managed-test-cluster";
         protected ArmClient Client { get; private set; }
+        protected ResourceIdentifier resourceIdentifier { get; private set; }
+        private const string OneBoxSubscriptionId = "1B081B08-1B08-1B08-1B08-1B081B081B08";
+        protected const string resourceId = $"/subscriptions/{OneBoxSubscriptionId}/resourcegroups/{OneBoxSubscriptionId}/providers/Microsoft.ServiceFabric/managedclusters/{clusterName}";
 
         protected ServiceFabricManagedClustersManagementTestBase(bool isAsync, RecordedTestMode mode)
         : base(isAsync, mode)
@@ -24,18 +30,14 @@ namespace Azure.ResourceManager.ServiceFabricManagedClusters.Tests
         {
         }
 
-        [SetUp]
-        public void CreateCommonClient()
+        public ArmOperation<ServiceFabricManagedClusterResource> createClusterResource()
         {
             Client = GetArmClient();
-        }
+            resourceIdentifier = new ResourceIdentifier(resourceId);
+            ServiceFabricManagedClusterData data = new ServiceFabricManagedClusterData(AzureLocation.CentralUS);
 
-        protected async Task<ResourceGroupResource> CreateResourceGroup(SubscriptionResource subscription, string rgNamePrefix, AzureLocation location)
-        {
-            string rgName = Recording.GenerateAssetName(rgNamePrefix);
-            ResourceGroupData input = new ResourceGroupData(location);
-            var lro = await subscription.GetResourceGroups().CreateOrUpdateAsync(WaitUntil.Completed, rgName, input);
-            return lro.Value;
+            ServiceFabricManagedClusterCollection sfmcCollection =  new ServiceFabricManagedClusterCollection(Client, resourceIdentifier);
+            return sfmcCollection.CreateOrUpdate(WaitUntil.Completed, clusterName, data, CancellationToken.None);
         }
     }
 }
