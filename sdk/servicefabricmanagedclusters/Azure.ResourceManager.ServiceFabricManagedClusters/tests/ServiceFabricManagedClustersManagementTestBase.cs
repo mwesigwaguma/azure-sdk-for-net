@@ -16,11 +16,12 @@ namespace Azure.ResourceManager.ServiceFabricManagedClusters.Tests
 {
     public class ServiceFabricManagedClustersManagementTestBase : ManagementRecordedTestBase<ServiceFabricManagedClustersManagementTestEnvironment>
     {
-        public ServiceFabricManagedClusterCollection collection { get; set; }
+        public ServiceFabricManagedClusterCollection clusterCollection { get; set; }
         public string clusterName = "sfmctestcluster";
         public ArmClient client { get; set; }
-        public const string subscriptionId = "13ad2c84-84fa-4798-ad71-e70c07af873f";
-        public const string resourceGroupName = "rg-mwesigwagumaazureresourcemanagerservicefabricmanagedclusters";
+        //public const string subscriptionId = "13ad2c84-84fa-4798-ad71-e70c07af873f";
+        //public const string resourceGroupName = "rg-mwesigwagumaazureresourcemanagerservicefabricmanagedclusters";
+        private ResourceGroupResource resourceGroupResource;
         protected ServiceFabricManagedClustersManagementTestBase(bool isAsync, RecordedTestMode mode)
         : base(isAsync, mode)
         {
@@ -35,18 +36,19 @@ namespace Azure.ResourceManager.ServiceFabricManagedClusters.Tests
 
         public async void createClusterResource()
         {
-            Console.WriteLine("Executing creatClusterResource function");
+           /* Console.WriteLine("Executing creatClusterResource function");
             TokenCredential cred = new DefaultAzureCredential();
 
-            client = new ArmClient(cred);
+            client = new ArmClient(cred);*/
 
             // this example assumes you already have this ResourceGroupResource created on azure
             // for more information of creating ResourceGroupResource, please refer to the document of ResourceGroupResource
-            ResourceIdentifier resourceGroupResourceId = ResourceGroupResource.CreateResourceIdentifier(subscriptionId, resourceGroupName);
-            ResourceGroupResource resourceGroupResource = client.GetResourceGroupResource(resourceGroupResourceId);
+            //ResourceIdentifier resourceGroupResourceId = ResourceGroupResource.CreateResourceIdentifier(subscriptionId, resourceGroupName);
+
+            resourceGroupResource = await CreateResourceGroupAsync();
 
             // get the collection of this ServiceFabricManagedClusterResource
-            collection = resourceGroupResource.GetServiceFabricManagedClusters();
+            clusterCollection = resourceGroupResource.GetServiceFabricManagedClusters();
             ServiceFabricManagedClusterData data = new ServiceFabricManagedClusterData(new AzureLocation("southcentralus"))
             {
                 DnsName = clusterName,
@@ -57,9 +59,12 @@ namespace Azure.ResourceManager.ServiceFabricManagedClusters.Tests
                 HttpGatewayConnectionPort = 19080
             };
 
-            ResourceIdentifier serviceFabricManagedClusterResourceId = ServiceFabricManagedClusterResource.CreateResourceIdentifier(subscriptionId, resourceGroupName, clusterName);
-            ServiceFabricManagedClusterResource serviceFabricManagedCluster = client.GetServiceFabricManagedClusterResource(serviceFabricManagedClusterResourceId);
-            ArmOperation<ServiceFabricManagedClusterResource> lro = await collection.CreateOrUpdateAsync(WaitUntil.Completed, clusterName, data);
+            //ResourceIdentifier serviceFabricManagedClusterResourceId = ServiceFabricManagedClusterResource.CreateResourceIdentifier(subscriptionId, resourceGroupName, clusterName);
+            //ServiceFabricManagedClusterResource serviceFabricManagedCluster = client.GetServiceFabricManagedClusterResource(serviceFabricManagedClusterResourceId);
+
+            ServiceFabricManagedClusterResource serviceFabricManagedCluster = (await clusterCollection.CreateOrUpdateAsync(WaitUntil.Completed, "testCluster", data)).Value;
+
+            ArmOperation <ServiceFabricManagedClusterResource> lro = await clusterCollection.CreateOrUpdateAsync(WaitUntil.Completed, clusterName, data);
 
             ServiceFabricManagedNodeTypeCollection nodeTypeCollection = serviceFabricManagedCluster.GetServiceFabricManagedNodeTypes();
 
