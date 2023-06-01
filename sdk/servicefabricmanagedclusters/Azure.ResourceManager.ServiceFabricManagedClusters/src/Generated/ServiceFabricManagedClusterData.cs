@@ -42,6 +42,25 @@ namespace Azure.ResourceManager.ServiceFabricManagedClusters
             ServiceEndpoints = new ChangeTrackingList<ManagedClusterServiceEndpoint>();
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ServiceFabricManagedClusterData"/> class.
+        /// </summary>
+        /// <param name="location"></param>
+        public ServiceFabricManagedClusterData(AzureLocation location) : base(location)
+        {
+
+            Sku = new ServiceFabricManagedClustersSku(ServiceFabricManagedClustersSkuName.Standard);
+            ClusterCertificateThumbprints = new ChangeTrackingList<BinaryData>();
+            LoadBalancingRules = new ChangeTrackingList<ManagedClusterLoadBalancingRule>();
+            NetworkSecurityRules = new ChangeTrackingList<ServiceFabricManagedNetworkSecurityRule>();
+            Clients = new ChangeTrackingList<ManagedClusterClientCertificate>();
+            FabricSettings = new ChangeTrackingList<ClusterFabricSettingsSection>();
+            AddOnFeatures = new ChangeTrackingList<ManagedClusterAddOnFeature>();
+            IPTags = new ChangeTrackingList<ManagedClusterIPTag>();
+            AuxiliarySubnets = new ChangeTrackingList<ManagedClusterSubnet>();
+            ServiceEndpoints = new ChangeTrackingList<ManagedClusterServiceEndpoint>();
+        }
+
         /// <summary> Initializes a new instance of ServiceFabricManagedClusterData. </summary>
         /// <param name="id"> The id. </param>
         /// <param name="name"> The name. </param>
