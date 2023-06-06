@@ -1,0 +1,45 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
+    "contentVersion": "1.0.0.0",
+
+    "resources": [
+        {
+            "apiVersion": "2023-03-01-preview",
+            "type": "Microsoft.ServiceFabric/managedclusters",
+            "name": "testcluster",
+            "location": "southcentralus",
+            "sku": {
+                "name" : "Standard"
+            },
+            "tags": {
+                "SFRP.CertificateSource": "Dsms"
+            },
+            "properties": {
+                "dnsName": "testcluster",
+                "adminUserName": "testusername",
+                "adminPassword": "TestPass123!",
+                "clientConnectionPort": 19000,
+                "httpGatewayConnectionPort": 19080
+            }
+        },
+        {
+            "apiVersion": "2023-03-01-preview",
+            "type": "Microsoft.ServiceFabric/managedclusters/nodetypes",
+            "name": "testcluster/nodetype1",
+            "location": "southcentralus",
+            "dependsOn": [
+              "['Microsoft.ServiceFabric/managedclusters/testcluster']"
+            ],
+            "properties": {
+                "isPrimary": true,
+                "vmImagePublisher": "MicrosoftWindowsServer",
+                "vmImageOffer": "WindowsServer",
+                "vmImageSku": "2022-datacenter",
+                "vmImageVersion": "latest",
+                "vmSize": "Standard_D8s_v3",
+                "vmInstanceCount": 5,
+                "dataDiskSizeGB": 100
+            }
+        }
+    ]
+}

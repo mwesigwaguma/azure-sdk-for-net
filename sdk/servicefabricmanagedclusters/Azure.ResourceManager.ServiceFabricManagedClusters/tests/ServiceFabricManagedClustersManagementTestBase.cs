@@ -6,30 +6,19 @@ using System.Threading;
 using System.Threading.Tasks;
 using Azure.Core;
 using Azure.Core.TestFramework;
-using Azure.Identity;
 using Azure.ResourceManager.Resources;
 using Azure.ResourceManager.ServiceFabricManagedClusters.Models;
 using Azure.ResourceManager.TestFramework;
 using NUnit.Framework;
+using Azure.ResourceManager.ManagedServiceIdentities;
 
 namespace Azure.ResourceManager.ServiceFabricManagedClusters.Tests
 {
     public class ServiceFabricManagedClustersManagementTestBase : ManagementRecordedTestBase<ServiceFabricManagedClustersManagementTestEnvironment>
     {
-        public static AzureLocation DefaultLocation => AzureLocation.SouthCentralUS;
-        //internal const string DefaultNamespaceAuthorizationRule = "RootManageSharedAccessKey";
         protected SubscriptionResource DefaultSubscription;
+        public static AzureLocation DefaultLocation => AzureLocation.SouthCentralUS;
         protected ArmClient Client { get; private set; }
-
-        //protected const string VaultName = "PS-Test-kv1";
-        //protected const string Key1 = "key1";
-        //protected const string Key2 = "key2";
-        public ServiceFabricManagedClusterCollection clusterCollection { get; set; }
-        public string clusterName = "sfmctestcluster";
-        public ArmClient client { get; set; }
-        //public const string subscriptionId = "13ad2c84-84fa-4798-ad71-e70c07af873f";
-        //public const string resourceGroupName = "rg-mwesigwagumaazureresourcemanagerservicefabricmanagedclusters";
-        private ResourceGroupResource resourceGroupResource;
         protected ServiceFabricManagedClustersManagementTestBase(bool isAsync, RecordedTestMode mode)
         : base(isAsync, mode)
         {
@@ -42,9 +31,22 @@ namespace Azure.ResourceManager.ServiceFabricManagedClusters.Tests
             Console.WriteLine("Executing SfmcTestBase constructor");
         }
 
+        [SetUp]
+        public async Task CreateCommonClient()
+        {
+            // Currently our pipeline will run this test project with project reference
+            // And we jsut upgraded the version of ManagedServiceIdentities, therefore the related tests will fail
+            // Use the version override as a work around because we lack the test resource now.
+            ArmClientOptions options = new ArmClientOptions();
+            options.SetApiVersion(UserAssignedIdentityResource.ResourceType, "2018-11-30");
+
+            Client = GetArmClient(options);
+            DefaultSubscription = await Client.GetDefaultSubscriptionAsync();
+        }
+
         public async Task<ResourceGroupResource> CreateResourceGroupAsync()
         {
-            string resourceGroupName = Recording.GenerateAssetName("testeventhubRG-");
+            string resourceGroupName = Recording.GenerateAssetName("testClusterRG-");
             ArmOperation<ResourceGroupResource> operation = await DefaultSubscription.GetResourceGroups().CreateOrUpdateAsync(
                 WaitUntil.Completed,
                 resourceGroupName,
@@ -56,62 +58,6 @@ namespace Azure.ResourceManager.ServiceFabricManagedClusters.Tests
                     }
                 });
             return operation.Value;
-        }
-
-        public async void createClusterResource()
-        {
-           /* Console.WriteLine("Executing creatClusterResource function");
-            TokenCredential cred = new DefaultAzureCredential();
-
-            client = new ArmClient(cred);*/
-
-            // this example assumes you already have this ResourceGroupResource created on azure
-            // for more information of creating ResourceGroupResource, please refer to the document of ResourceGroupResource
-            //ResourceIdentifier resourceGroupResourceId = ResourceGroupResource.CreateResourceIdentifier(subscriptionId, resourceGroupName);
-
-            resourceGroupResource = await CreateResourceGroupAsync();
-
-            // get the collection of this ServiceFabricManagedClusterResource
-            clusterCollection = resourceGroupResource.GetServiceFabricManagedClusters();
-            ServiceFabricManagedClusterData data = new ServiceFabricManagedClusterData(new AzureLocation("southcentralus"))
-            {
-                DnsName = clusterName,
-                AdminUserName = "Myusername4",
-                AdminPassword = "Sfmcpass5!",
-                Sku = new ServiceFabricManagedClustersSku(ServiceFabricManagedClustersSkuName.Standard),
-                ClientConnectionPort = 19000,
-                HttpGatewayConnectionPort = 19080
-            };
-
-            //ResourceIdentifier serviceFabricManagedClusterResourceId = ServiceFabricManagedClusterResource.CreateResourceIdentifier(subscriptionId, resourceGroupName, clusterName);
-            //ServiceFabricManagedClusterResource serviceFabricManagedCluster = client.GetServiceFabricManagedClusterResource(serviceFabricManagedClusterResourceId);
-
-            ServiceFabricManagedClusterResource serviceFabricManagedCluster = (await clusterCollection.CreateOrUpdateAsync(WaitUntil.Completed, "testCluster", data)).Value;
-
-            ArmOperation <ServiceFabricManagedClusterResource> lro = await clusterCollection.CreateOrUpdateAsync(WaitUntil.Completed, clusterName, data);
-
-            ServiceFabricManagedNodeTypeCollection nodeTypeCollection = serviceFabricManagedCluster.GetServiceFabricManagedNodeTypes();
-
-            string nodeTypeName = "nodetype1";
-            ServiceFabricManagedNodeTypeData nodeTypeData = new ServiceFabricManagedNodeTypeData()
-            {
-                IsPrimary = true,
-                VmInstanceCount = 5,
-                DataDiskSizeInGB = 100,
-                VmSize = "Standard_D2s_v3",
-                VmImagePublisher = "MicrosoftWindowsServer",
-                VmImageOffer = "WindowsServer",
-                VmImageSku = "2022-Datacenter",
-                VmImageVersion = "latest",
-            };
-
-            ArmOperation<ServiceFabricManagedNodeTypeResource> lroNodeType = await nodeTypeCollection.CreateOrUpdateAsync(WaitUntil.Completed, nodeTypeName, nodeTypeData);
-
-            /*ServiceFabricManagedClusterResource result = lro.Value;
-
-            // the variable result is a resource, you could call other operations on this instance as well
-            // but just for demo, we get its data from this resource instance
-            ServiceFabricManagedClusterData resourceData = result.Data;*/
         }
     }
 }
